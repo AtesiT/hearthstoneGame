@@ -1,0 +1,5 @@
+node_modules/
+.arena/
+.cache/
+.next/
+npm-debug.log

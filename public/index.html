@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#0d0a14">
+  <title>EMBERFALL — Пепел и Пламя</title>
+  <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/css/main.css?v=10">
+</head>
+<body>
+  <!-- декоративный фон: вспыхивающие «угольки» (canvas-free, чистый CSS) -->
+  <div id="embers" aria-hidden="true"></div>
+  <div id="scanlines" aria-hidden="true"></div>
+
+  <!-- индикатор соединения -->
+  <div id="net-status" class="off" title="Состояние соединения с сервером">
+    <i></i><span>отсутствует</span>
+  </div>
+
+  <main id="app">
+    <!-- ═══ Главное меню ═══ -->
+    <section id="screen-menu" class="screen active">
+      <div class="title-wrap">
+        <div class="flame-holder" aria-hidden="true"><div class="pixel-flame" id="flame"></div></div>
+        <h1 class="game-title">EMBERFALL</h1>
+        <p class="subtitle">Пепел и Пламя · карточный поединок</p>
+      </div>
+
+      <div class="panel menu-panel">
+        <label class="field">
+          <span class="field-label">Ваше имя</span>
+          <input id="nick-input" maxlength="16" placeholder="3–16 символов" autocomplete="off" spellcheck="false">
+        </label>
+        <div class="btn-col">
+          <button id="btn-create" class="btn btn-amber">Создать комнату · с другом</button>
+          <button id="btn-ai" class="btn btn-green">⚔ Игра против ИИ</button>
+          <button id="btn-lobby" class="btn">Лобби · Присоединиться</button>
+          <button id="btn-collection" class="btn">Коллекция карт</button>
+          <button id="btn-settings" class="btn btn-small">⚙ Настройки</button>
+        </div>
+        <p class="hint">Игра работает в локальной сети — интернет не нужен.</p>
+      </div>
+
+      <footer class="ver">v1.0 · финал</footer>
+    </section>
+
+    <!-- ═══ Коллекция карт (Этап 5) ═══ -->
+    <section id="screen-collection" class="screen">
+      <div class="panel collection-panel">
+        <div class="panel-head">
+          <h2>Коллекция карт <span class="col-count" id="collection-count">30</span></h2>
+          <button class="btn btn-small" id="btn-collection-back">← Меню</button>
+        </div>
+        <div class="col-toolbar">
+          <div class="col-filters" id="collection-filters">
+            <button class="btn btn-small cf-btn active" data-type="all">Все</button>
+            <button class="btn btn-small cf-btn" data-type="minion">Существа</button>
+            <button class="btn btn-small cf-btn" data-type="spell">Заклинания</button>
+            <button class="btn btn-small cf-btn" data-type="weapon">Оружие</button>
+          </div>
+          <label class="col-sort">
+            <span>Сортировка</span>
+            <select id="collection-sort">
+              <option value="cost">по мане</option>
+              <option value="name">по имени</option>
+              <option value="type">по типу</option>
+            </select>
+          </label>
+        </div>
+        <div class="col-grid" id="collection-grid">
+          <div class="room-empty">Загрузка…</div>
+        </div>
+      </div>
+
+      <!-- детальная карта -->
+      <div id="card-detail" class="card-detail" hidden>
+        <div class="card-detail-panel"></div>
+      </div>
+    </section>
+
+    <!-- ═══ Настройки (Этап 5) ═══ -->
+    <div id="settings-panel" class="settings-panel" hidden>
+      <div class="settings-box">
+        <div class="panel-head">
+          <h2>Настройки</h2>
+          <button class="btn btn-small" id="btn-settings-close">✕</button>
+        </div>
+        <label class="set-row">
+          <span>Громкость музыки</span>
+          <span class="set-ctl"><input type="range" id="set-music-vol" min="0" max="100" step="5"><b>80%</b></span>
+        </label>
+        <label class="set-row">
+          <span>Звуковые эффекты</span>
+          <input type="checkbox" id="set-sfx" checked>
+        </label>
+        <label class="set-row">
+          <span>Подсказки на столе</span>
+          <input type="checkbox" id="set-hints" checked>
+        </label>
+      </div>
+    </div>
+
+    <!-- ═══ Лобби ═══ -->
+    <section id="screen-lobby" class="screen">
+      <div class="panel lobby-panel">
+        <div class="panel-head">
+          <h2>Лобби комнат</h2>
+          <button class="btn btn-small" data-act="back-menu">← Меню</button>
+        </div>
+        <div class="room-list" id="room-list">
+          <div class="room-empty">Загрузка…</div>
+        </div>
+        <div class="join-row">
+          <input id="join-code" maxlength="5" placeholder="КОД" autocomplete="off" spellcheck="false">
+          <button id="btn-join" class="btn btn-amber">Войти по коду</button>
+        </div>
+        <button id="btn-create-lobby" class="btn">+ Создать новую комнату</button>
+      </div>
+    </section>
+
+    <!-- ═══ Ожидание игрока ═══ -->
+    <section id="screen-waiting" class="screen">
+      <div class="panel waiting-panel">
+        <div class="panel-head">
+          <h2>Комната ожидания</h2>
+          <button class="btn btn-small" data-act="back-menu">← Меню</button>
+        </div>
+
+        <div class="room-code-wrap">
+          <span class="field-label">Код комнаты — назовите другу</span>
+          <div class="room-code-row">
+            <div class="room-code" id="room-code">-----</div>
+            <button class="btn btn-small" id="btn-copy-code">Копировать</button>
+          </div>
+        </div>
+
+        <div class="seats" id="seats"></div>
+
+        <div class="waiting-actions">
+          <button id="btn-ready" class="btn btn-amber">Готов</button>
+          <button id="btn-start" class="btn btn-green" hidden>Начать матч</button>
+          <button id="btn-leave" class="btn btn-red">Покинуть</button>
+        </div>
+        <p class="hint" id="waiting-hint">
+          Друг открывает ваш адрес в браузере, нажимает «Лобби» и вводит код комнаты.
+        </p>
+      </div>
+    </section>
+
+    <!-- ═══ Игровой стол ═══ -->
+    <section id="screen-game" class="screen game-screen">
+      <div id="table">
+        <button id="btn-log" class="btn btn-small btn-log" title="Боевой лог (клавиша Л)">☰ Лог</button>
+        <!-- Зона противника -->
+        <div class="zone">
+          <div class="hero-row">
+            <div id="opp-hero" class="hero-box hero-opp" title="Герой противника">
+              <div class="hero-avatar av-1" id="opp-avatar">B</div>
+              <div class="hero-meta">
+                <div class="hero-name" id="opp-name">—</div>
+                <div class="hero-hp"><i class="ic-hp"></i><span id="opp-hp">30</span></div>
+              </div>
+              <div class="hero-weapon" id="opp-weapon" hidden></div>
+            </div>
+            <div class="opp-hand-wrap">
+              <div class="opp-hand" id="opp-hand"></div>
+              <div class="opp-hand-count" id="opp-hand-count">0</div>
+            </div>
+            <div class="deck" id="opp-deck" title="Колода противника">
+              <div class="deck-stack"></div>
+              <span class="deck-count" id="opp-deck-count">30</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Поле -->
+        <div class="board">
+          <div class="board-row" id="row-opp"></div>
+          <div class="board-divider"><span class="turn-indicator" id="turn-indicator">…</span></div>
+          <div class="board-row" id="row-self"></div>
+        </div>
+
+        <!-- Зона игрока -->
+        <div class="zone">
+          <div class="hero-row self-row">
+            <div class="hero-box hero-self" id="self-hero">
+              <div class="hero-avatar av-0" id="self-avatar">A</div>
+              <div class="hero-meta">
+                <div class="hero-name" id="self-name">—</div>
+                <div class="hero-hp"><i class="ic-hp"></i><span id="self-hp">30</span></div>
+                <div class="mana" id="mana"></div>
+              </div>
+              <div class="hero-weapon" id="self-weapon" hidden></div>
+            </div>
+            <div class="deck" id="self-deck" title="Ваша колода">
+              <div class="deck-stack"></div>
+              <span class="deck-count" id="self-deck-count">30</span>
+            </div>
+            <div class="end-turn-wrap">
+              <button id="btn-end-turn" class="btn btn-amber" disabled>Завершить ход</button>
+              <div class="hint-line" id="hint-line">…</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Рука -->
+        <div class="hand" id="hand"></div>
+      </div>
+
+      <!-- Баннер смены хода -->
+      <div id="banner" class="banner"><span id="banner-text">ВАШ ХОД</span></div>
+
+      <!-- Боевой лог (Этап 5): выдвигающаяся панель справа -->
+      <aside id="battle-log" class="battle-log" aria-label="Боевой лог">
+        <div class="log-head">Боевой лог</div>
+        <div id="log-lines" class="log-lines"></div>
+      </aside>
+    </section>
+  </main>
+
+  <!-- Тултип карты (Этап 5): плавающий, вне экранов -->
+  <div id="card-tip" class="card-tip" hidden></div>
+
+  <!-- Результат матча (вне экранов, показывается только после game_over) -->
+  <div id="result-overlay" class="result-overlay" hidden aria-hidden="true">
+    <div class="result-panel">
+      <h1 id="result-title" class="win">ПОБЕДА!</h1>
+      <p id="result-reason" class="hint">Герой противника пал</p>
+      <button id="btn-result-lobby" class="btn btn-amber" type="button">В лобби</button>
+    </div>
+  </div>
+
+  <!-- ═══ Универсальный оверлей (переподключение / оппонент отключился / вытеснение) ═══ -->
+  <div id="overlay" class="overlay" hidden>
+    <div class="panel overlay-panel">
+      <h2 id="overlay-title">Соединение потеряно</h2>
+      <div class="overlay-count" id="overlay-count" hidden>10</div>
+      <p class="hint" id="overlay-hint">Пытаемся переподключиться…</p>
+      <button id="btn-overlay-menu" class="btn" hidden>В меню</button>
+    </div>
+  </div>
+
+  <div id="toast-box" aria-live="polite"></div>
+
+  <script type="module" src="/js/ui/main.js?v=10"></script>
+</body>
+</html>

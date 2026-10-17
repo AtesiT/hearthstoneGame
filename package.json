@@ -1,0 +1,30 @@
+{
+  "name": "emberfall",
+  "version": "0.1.0",
+  "description": "EMBERFALL — «Пепел и Пламя»: карточная игра для двоих по локальной сети (вдохновлено Hearthstone, пиксельный стиль)",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "start": "node server/index.js",
+    "test": "node --test \"server/test/*.test.js\"",
+    "sim": "node scripts/sim-lobby.js",
+    "sim-game": "node scripts/sim-game.js",
+    "test-ui": "node scripts/sim-ui.js",
+    "art": "node scripts/gen-art.js",
+    "sim-reconnect": "node scripts/sim-reconnect.js",
+    "sim-balance": "node scripts/sim-balance.js",
+    "sim-ai": "node scripts/sim-ai.js",
+    "gen-cards-doc": "node scripts/gen-cards-doc.js",
+    "acceptance": "node scripts/acceptance.js"
+  },
+  "dependencies": {
+    "@fontsource/press-start-2p": "^5.3.0",
+    "ws": "^8.22.0"
+  },
+  "devDependencies": {
+    "jsdom": "^30.1.3"
+  }
+}

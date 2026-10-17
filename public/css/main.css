@@ -23,24 +23,27 @@
 }
 
 :root {
-  /* палитра */
-  --bg-0: #171021;
-  --bg-1: #1e142c;
-  --panel: #241a33;
-  --panel-2: #2c2040;
-  --line: #0d0a14;
-  --line-2: #4a3563;
-  --text: #f0e6d2;
-  --text-dim: #a08fb8;
-  --amber: #ffb347;
-  --amber-2: #e8912d;
-  --gold: #ffd24a;
-  --green: #7ec850;
-  --red: #e05252;
-  --blue: #4aa3ff;
+  /* Палитра в духе Stardew Valley: тёплый пергамент, лесная зелень, ореховые рамки */
+  --bg-0: #2d1f14;          /* кора/тёмный орех */
+  --bg-1: #3f2c1d;          /* земля у кромки */
+  --panel: #f1e3c2;         /* пергамент */
+  --panel-2: #e3cf9b;       /* светлее пергамент */
+  --line: #563a22;          /* темнее орех */
+  --line-2: #a8824f;        /* ореховый кант */
+  --text: #3b2a18;          /* чернила на пергаменте */
+  --text-dim: #7a623f;      /* приглушённые чернила */
+  --amber: #e8912d;         /* оранжевый светлячок */
+  --amber-2: #c9731a;
+  --gold: #f6c23e;          /* золото звёзд */
+  --green: #6aa84f;         /* мох/трава */
+  --green-2: #8cc06d;
+  --red: #c8432f;           /* мак/рана */
+  --blue: #4a86c8;          /* вечернее небо */
+  --purple: #8a5ea0;
 
-  /* «пиксель» — базовый размер сетки для отступов/рамок */
   --px: 4px;
+  --radius: 6px;
+  --shadow: 0 4px 0 rgba(60, 30, 10, 0.35), 0 6px 14px rgba(0,0,0,0.35);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -50,13 +53,13 @@ html, body { height: 100%; }
 body {
   font-family: 'Press Start 2P', monospace;
   font-size: 10px;
-  line-height: 1.7;
+  line-height: 1.6;
   color: var(--text);
   background:
-    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.012) 0 2px, transparent 2px 4px),
-    radial-gradient(ellipse at 50% 120%, #3a2144 0%, var(--bg-1) 45%, var(--bg-0) 100%);
+    radial-gradient(ellipse at 50% -10%, #f3d894 0%, #d3a663 22%, #8c5a30 48%, var(--bg-1) 72%, var(--bg-0) 100%);
   overflow: hidden;
-  -webkit-font-smoothing: none;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
 img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
@@ -95,40 +98,45 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
   to   { opacity: 1; transform: translateY(0); }
 }
 
-/* ═══════════ Панели ═══════════ */
+/* ═══════════ Панели (Stardew-стиль: деревянная рамка + пергамент внутри) ═══════════ */
 .panel {
-  background: var(--panel);
+  background:
+    repeating-linear-gradient(90deg, rgba(120,75,30,0.05) 0 2px, transparent 2px 5px),
+    var(--panel);
   border: 4px solid var(--line);
+  border-radius: var(--radius);
   box-shadow:
     inset 0 0 0 2px var(--line-2),
-    10px 10px 0 rgba(0, 0, 0, 0.45);
-  padding: calc(var(--px) * 4);
+    inset 0 -3px 0 rgba(60,30,10,0.18),
+    0 8px 0 rgba(30,15,0,0.35),
+    0 12px 24px rgba(0,0,0,0.35);
+  padding: calc(var(--px) * 5);
   width: min(560px, 94vw);
 }
-.panel h2 { font-size: 14px; color: var(--gold); text-shadow: 2px 2px 0 #4a2c08; }
+.panel h2 { font-size: 13px; color: var(--amber-2); text-shadow: 1px 1px 0 #fff7dd; }
 .panel-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: calc(var(--px) * 3); gap: 12px; }
 
 /* ═══════════ Кнопки ═══════════ */
 .btn {
   font-family: inherit; font-size: 11px; cursor: pointer;
-  color: var(--text); background: #3a2a52;
+  color: #412910;
+  background: linear-gradient(#f4d58e, #dba851);
   border: 3px solid var(--line);
-  box-shadow: 0 5px 0 var(--line), inset 0 2px 0 rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 0 var(--line), inset 0 2px 0 rgba(255,255,255,0.35);
   padding: 12px 16px;
-  transition: transform 0.05s steps(2), box-shadow 0.05s steps(2), background 0.05s steps(2);
+  transition: transform .08s ease, box-shadow .08s ease, filter .08s ease;
   user-select: none;
 }
-.btn:hover:not(:disabled) { background: #4a3563; transform: translateY(-2px); box-shadow: 0 7px 0 var(--line), inset 0 2px 0 rgba(255, 255, 255, 0.12); }
-.btn:active:not(:disabled) { transform: translateY(3px); box-shadow: 0 1px 0 var(--line), inset 0 2px 0 rgba(255, 255, 255, 0.08); }
-.btn:disabled { opacity: 0.45; cursor: default; }
-.btn:focus-visible { outline: 3px dashed var(--gold); outline-offset: 2px; }
+.btn:hover:not(:disabled) { filter: brightness(1.05); transform: translateY(-2px); box-shadow: 0 6px 0 var(--line), inset 0 2px 0 rgba(255,255,255,0.45); }
+.btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 2px 0 var(--line), inset 0 2px 0 rgba(255,255,255,0.2); }
+.btn:disabled { opacity: 0.5; cursor: default; filter: grayscale(0.4); }
+.btn:focus-visible { outline: 3px dashed var(--amber-2); outline-offset: 2px; }
 
-.btn-amber { background: #a35d18; }
-.btn-amber:hover:not(:disabled) { background: #c06f1f; }
-.btn-green { background: #3f7a2e; }
-.btn-green:hover:not(:disabled) { background: #4c9438; }
-.btn-red { background: #7e2a2a; }
-.btn-red:hover:not(:disabled) { background: #963434; }
+.btn-amber { background: linear-gradient(#ffd070, #e0872a); color:#3c1f06; }
+.btn-green { background: linear-gradient(#b7dd84, #6aa84f); color:#233e14; }
+.btn-green:hover:not(:disabled) { filter: brightness(1.07); }
+.btn-red { background: linear-gradient(#e88a72, #c8432f); color:#4a160e; }
 .btn-small { font-size: 9px; padding: 8px 10px; }
 
 .btn-col { display: flex; flex-direction: column; gap: calc(var(--px) * 2); margin-top: calc(var(--px) * 3); }
@@ -293,7 +301,7 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   ИГРОВОЙ СТОЛ (этап 2)
+   ИГРОВОЙ СТОЛ (этап 8): Stardew-долина
    ═══════════════════════════════════════════════════════════════ */
 
 .screen.game-screen { display: none; }
@@ -304,8 +312,11 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
   width: 100%;
   height: 100vh;
   flex-direction: column;
+  background:
+    radial-gradient(ellipse at 50% 0%, #b8d38a 0%, #8eb76a 30%, #6a8946 55%, #8c5a30 75%, #603d1b 100%);
 }
 
+/* Карта-поле как в Hearthstone: дорога-тропинка посредине, травка, облачка */
 #table {
   display: grid;
   grid-template-rows: auto 1fr auto auto;
@@ -315,6 +326,77 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
   padding: 8px 16px 0;
   position: relative;
 }
+#table::before {
+  /* тропинка-дорога по центру */
+  content: '';
+  position: absolute;
+  left: 8%; right: 8%;
+  top: 38%; bottom: 30%;
+  background:
+    radial-gradient(ellipse 80% 100% at 50% 50%, #d5b075 0%, #b98a4f 60%, transparent 72%),
+    radial-gradient(ellipse 60% 80% at 30% 50%, rgba(255,240,200,0.25), transparent 70%),
+    radial-gradient(ellipse 60% 80% at 70% 50%, rgba(255,240,200,0.25), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  border-radius: 50%;
+  filter: blur(1px);
+}
+#table::after {
+  /* облачка */
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0; height: 22%;
+  background:
+    radial-gradient(ellipse 90px 22px at 15% 30%, #fff8e8 0%, transparent 70%),
+    radial-gradient(ellipse 120px 26px at 42% 18%, #fff8e8 0%, transparent 70%),
+    radial-gradient(ellipse 100px 22px at 78% 36%, #fff8e8 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.75;
+}
+
+/* Геройская способность */
+.hero-power {
+  position: relative;
+  width: 60px; height: 60px;
+  margin-left: 8px;
+  border-radius: 50%;
+  border: 4px solid var(--line);
+  background: radial-gradient(circle at 30% 30%, #ffe59a, #c4832e 70%, #8a541a);
+  box-shadow: 0 4px 0 var(--line), inset 0 2px 0 rgba(255,255,255,0.4);
+  cursor: pointer;
+  transition: transform .1s ease, filter .1s ease, box-shadow .1s ease;
+  font-family: inherit; color: #5a2d08;
+  align-self: center;
+  padding: 0;
+}
+.hero-power .hp-icon {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  color: #fff8dd;
+  text-shadow: 2px 2px 0 #6b3e12;
+}
+.hero-power .hp-cost {
+  position: absolute; bottom: -6px; right: -6px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #85c6ff, #2b6ac6);
+  border: 3px solid var(--line);
+  color: #fff; font-size: 9px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 0 var(--line);
+}
+.hero-power:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.04);
+  filter: brightness(1.08);
+}
+.hero-power:active:not(:disabled) { transform: translateY(1px) scale(1.0); }
+.hero-power.used, .hero-power:disabled {
+  filter: grayscale(0.7) brightness(0.8);
+  cursor: not-allowed;
+}
+.hero-power.ready { box-shadow: 0 0 0 3px rgba(255,210,80,0.55), 0 4px 0 var(--line), inset 0 2px 0 rgba(255,255,255,0.4); animation: power-pulse 1.5s ease-in-out infinite; }
+@keyframes power-pulse { 0%,100%{ box-shadow: 0 0 0 3px rgba(255,210,80,0.2), 0 4px 0 var(--line), inset 0 2px 0 rgba(255,255,255,0.4);} 50% { box-shadow: 0 0 0 6px rgba(255,210,80,0.45), 0 4px 0 var(--line), inset 0 2px 0 rgba(255,255,255,0.5); } }
 
 .zone { min-height: 0; }
 
@@ -332,32 +414,37 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
   display: flex;
   align-items: center;
   gap: 10px;
-  background: var(--panel);
+  background:
+    repeating-linear-gradient(90deg, rgba(120,75,30,0.05) 0 2px, transparent 2px 5px),
+    linear-gradient(#fff4d8, #e9cf93);
   border: 3px solid var(--line);
-  box-shadow: 0 0 0 2px var(--line-2), inset 0 0 0 2px #00000040;
+  border-radius: var(--radius);
+  box-shadow: 0 4px 0 var(--line), 0 6px 14px rgba(0,0,0,0.35), inset 0 0 0 2px var(--line-2);
   padding: 8px 12px;
   image-rendering: pixelated;
 }
 .hero-box.clickable, .hero-box:has(.targetable) { cursor: pointer; }
 .hero-box.targetable {
-  border-color: var(--gold);
-  box-shadow: 0 0 0 2px var(--gold), 0 0 18px #ffd24a66;
+  border-color: var(--amber-2);
+  box-shadow: 0 0 0 3px var(--gold), 0 0 18px rgba(246,194,62,0.6), 0 4px 0 var(--line);
 }
 .hero-avatar {
   width: 44px; height: 44px;
   display: flex; align-items: center; justify-content: center;
   font-size: 20px;
   border: 3px solid var(--line);
-  background: linear-gradient(160deg, #7a4a2a, #4a2a18);
-  color: #ffe9c9;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #d89b6c, #7a4a2a 70%, #4a2a18);
+  color: #fff3d8;
+  box-shadow: inset 0 2px 0 rgba(255,255,255,0.3);
 }
-.av-1 { background: linear-gradient(160deg, #2a4a7a, #182a4a); color: #cfe4ff; }
+.av-1 { background: radial-gradient(circle at 30% 30%, #8bb7e5, #3a6aa2 70%, #1d3963); color: #f1f8ff; }
 .hero-meta { display: flex; flex-direction: column; gap: 4px; }
-.hero-name { font-size: 7px; color: var(--text-dim); max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hero-name { font-size: 8px; color: var(--text); max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-shadow: 1px 1px 0 rgba(255,255,255,0.4); }
 .hero-hp {
   display: flex; align-items: center; gap: 6px;
   font-size: 14px; color: var(--red);
-  text-shadow: 0 0 6px #e0525255;
+  text-shadow: 1px 1px 0 #fff3d8;
 }
 .hero-hp.hurt { animation: hp-pulse 1s steps(2) infinite; }
 @keyframes hp-pulse { 50% { opacity: .55; } }
@@ -383,14 +470,17 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 .mana { display: flex; gap: 3px; flex-wrap: wrap; max-width: 150px; }
 .mana-crystal {
   width: 10px; height: 10px;
-  background: #1d2a4a;
-  border: 2px solid #0d1424;
+  background: #c2a773;
+  border: 2px solid var(--line);
+  border-radius: 2px;
   transform: rotate(45deg);
+  opacity: 0.5;
 }
 .mana-crystal.full {
-  background: radial-gradient(circle at 35% 35%, #8fd0ff, var(--blue) 60%, #1a4a8a);
+  background: radial-gradient(circle at 35% 35%, #9cd0ff, var(--blue) 60%, #1a4a8a);
   border-color: #0a1a30;
-  box-shadow: 0 0 6px #4aa3ff88;
+  opacity: 1;
+  box-shadow: 0 0 6px rgba(74,134,200,0.7), inset 0 1px 0 rgba(255,255,255,0.4);
 }
 
 /* ---------- колода ---------- */
@@ -398,9 +488,10 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 .deck-stack {
   position: absolute; inset: 0;
   background:
-    repeating-linear-gradient(45deg, #3a2a4e 0 6px, #2e2140 6px 12px);
+    repeating-linear-gradient(-45deg, #6a8946 0 6px, #4e6a32 6px 12px);
   border: 3px solid var(--line);
-  box-shadow: 3px 3px 0 #00000060, inset 0 0 0 2px var(--line-2);
+  border-radius: 6px;
+  box-shadow: 2px 4px 0 var(--line), 0 4px 10px rgba(0,0,0,0.35), inset 0 0 0 2px rgba(255,255,255,0.12);
 }
 .deck-stack::after {
   content: '';
@@ -411,10 +502,12 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
   position: absolute; right: -6px; bottom: -6px;
   min-width: 22px; height: 20px;
   display: flex; align-items: center; justify-content: center;
-  background: var(--bg-0);
-  border: 2px solid var(--line-2);
-  font-size: 9px; color: var(--amber);
+  background: linear-gradient(#fff4d8, #e9cf93);
+  border: 2px solid var(--line);
+  border-radius: 4px;
+  font-size: 9px; color: var(--amber-2);
   padding: 0 3px;
+  box-shadow: 0 2px 0 var(--line);
 }
 .deck.burn-flash .deck-stack { animation: burn-fx .5s steps(3); }
 @keyframes burn-fx {
@@ -429,9 +522,10 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 .card-back {
   width: 34px; height: 46px;
   background:
-    repeating-linear-gradient(-45deg, #4a2a5e 0 5px, #3a2048 5px 10px);
+    repeating-linear-gradient(-45deg, #6a8946 0 5px, #4e6a32 5px 10px);
   border: 2px solid var(--line);
-  box-shadow: inset 0 0 0 2px #00000050;
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.15), 0 2px 0 var(--line);
 }
 .opp-hand-count { font-size: 8px; color: var(--text-dim); }
 
@@ -452,14 +546,16 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 }
 .slot {
   width: 74px; height: 92px;
-  border: 2px dashed #ffffff12;
+  border: 2px dashed rgba(255,244,216,0.35);
+  border-radius: 6px;
 }
 .board-divider {
-  height: 2px;
-  margin: 6px auto;
+  height: 4px;
+  margin: 4px auto;
   width: 70%;
-  background: #ffffff14;
+  background: linear-gradient(to right, transparent, rgba(80,50,20,0.6), transparent);
   position: relative;
+  border-radius: 2px;
 }
 .turn-indicator {
   position: absolute; left: 50%; top: 50%;
@@ -477,28 +573,31 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 .unit {
   position: relative;
   width: 70px; height: 88px;
-  background: var(--panel-2);
+  background: linear-gradient(#fff4d8, #e9cf93);
   border: 3px solid var(--line);
-  box-shadow: inset 0 0 0 2px #00000050;
+  border-radius: 8px;
+  box-shadow: 0 4px 0 var(--line), 0 6px 14px rgba(0,0,0,0.35), inset 0 0 0 2px var(--line-2);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 3px 2px 0;
   user-select: none;
-  transition: transform .08s;
+  transition: transform .12s ease, box-shadow .12s ease;
 }
 .unit-mine { cursor: pointer; }
+.unit-mine:hover { transform: translateY(-4px); }
 .unit-opp { cursor: pointer; }
 .unit .unit-art {
   width: 52px; height: 52px;
   overflow: hidden;
   border: 2px solid var(--line);
-  background: #000;
+  border-radius: 4px;
+  background: #3d2614;
 }
 .unit .unit-art img { width: 100%; height: 100%; image-rendering: pixelated; display: block; }
 .unit-name {
   font-size: 5px;
-  color: var(--text-dim);
+  color: var(--text);
   margin-top: 2px;
   max-width: 62px;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
@@ -508,14 +607,15 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
 .kw {
   font-size: 5px;
   padding: 1px 3px;
-  background: #00000060;
+  background: rgba(80,50,20,0.15);
   border: 1px solid var(--line-2);
-  color: var(--text-dim);
+  border-radius: 3px;
+  color: var(--text);
 }
-.kw-charge { color: var(--gold); border-color: var(--amber-2); }
-.kw-divine_shield { color: #bfe3ff; border-color: var(--blue); }
-.kw-poisonous { color: var(--green); border-color: #3a6a2a; }
-.kw-taunt { color: #d8b08a; border-color: #8a6a4a; }
+.kw-charge { color: var(--amber-2); border-color: var(--amber-2); }
+.kw-divine_shield { color: #2a6fb0; border-color: var(--blue); }
+.kw-poisonous { color: #3c7a26; border-color: var(--green); }
+.kw-taunt { color: #6a3a14; border-color: #8a6a4a; }
 
 .unit-hp, .unit-atk {
   position: absolute;
@@ -610,30 +710,34 @@ img, canvas { image-rendering: pixelated; image-rendering: crisp-edges; }
   justify-content: center;
   align-items: flex-end;
   gap: 6px;
-  min-height: 118px;
-  padding: 10px 0 12px;
+  min-height: 140px;
+  padding: 30px 24px 12px;
   overflow-x: auto;
+  overflow-y: visible;
 }
 .hand-card {
   position: relative;
   width: 86px; height: 116px;
   flex: 0 0 auto;
-  background: var(--panel);
-  border: 3px solid var(--line-2);
-  box-shadow: 0 4px 0 #00000080;
+  background:
+    repeating-linear-gradient(90deg, rgba(120,75,30,0.05) 0 2px, transparent 2px 5px),
+    linear-gradient(#fff4d8, #e9cf93);
+  border: 3px solid var(--line);
+  border-radius: 8px;
+  box-shadow: 0 5px 0 var(--line), 0 8px 16px rgba(0,0,0,0.35), inset 0 0 0 2px var(--line-2);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding-top: 14px;
   cursor: pointer;
   user-select: none;
-  transition: transform .1s;
+  transition: transform .15s cubic-bezier(.2,.7,.2,1.1), box-shadow .15s;
 }
-.hand-card:hover { transform: translateY(-10px) scale(1.04); z-index: 10; }
+.hand-card:hover { transform: translateY(-18px) scale(1.15); z-index: 10; box-shadow: 0 12px 0 var(--line), 0 20px 28px rgba(0,0,0,0.45), inset 0 0 0 2px var(--line-2); }
 .hand-card.selected {
-  transform: translateY(-16px) scale(1.07);
-  border-color: var(--gold);
-  box-shadow: 0 0 0 2px var(--gold), 0 0 20px #ffd24a66, 0 6px 0 #00000080;
+  transform: translateY(-22px) scale(1.18);
+  border-color: var(--amber-2);
+  box-shadow: 0 0 0 3px var(--gold), 0 0 24px rgba(246,194,62,0.6), 0 12px 0 var(--line);
   z-index: 11;
 }
 .hand-card.unplayable { filter: saturate(.5) brightness(.75); cursor: not-allowed; }
@@ -1215,6 +1319,10 @@ input { font-size: max(10px, 16px); } /* iOS: 16px = не зумит при фо
   .opp-hand-card { width: 20px; height: 28px; margin: 0 1px; }
   .deck { width: 30px; height: 44px; }
   .deck-count { font-size: 8px; }
+  .hero-power { width: 44px; height: 44px; margin-left: 4px; }
+  .hero-power .hp-icon { font-size: 16px; }
+  .hero-power .hp-cost { width: 18px; height: 18px; font-size: 7px; bottom: -4px; right: -4px; }
+  .hero-box { padding: 6px 8px; gap: 6px; }
   .btn-end-turn { font-size: 9px; padding: 6px 8px; }
   .hint-line { font-size: 8px; }
   .battle-log { width: 70vw; font-size: 8px; }

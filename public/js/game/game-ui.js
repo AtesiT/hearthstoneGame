@@ -191,6 +191,15 @@ function buildTable() {
     clearSelection();
     hooks.send('end_turn', { ack: lastSeq });
   });
+  document.getElementById('btn-hero-power').addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (!isMyTurn()) return;
+    const st = (lastState && lastState.self && lastState.self.power) || {};
+    if (!st.playable) return;
+    clearSelection();
+    hooks.send('hero_power', { ack: lastSeq });
+    sfx.play('btnClick');
+  });
   document.getElementById('btn-result-lobby').addEventListener('click', () => {
     resultShownFlag = false;
     hideResultOverlay();
@@ -507,6 +516,20 @@ function renderControls() {
   ti.classList.toggle('mine', isMyTurn());
   // оружие: подсвечка готовности к атаке
   document.getElementById('self-hero').classList.toggle('can-weapon', !!vs.self.attacks?.weapon);
+  // геройская способность
+  const hp = document.getElementById('btn-hero-power');
+  const ps = vs.self.power || {};
+  const disabled = !isMyTurn() || !ps.playable;
+  hp.disabled = disabled;
+  hp.classList.toggle('used', isMyTurn() && ps.used);
+  hp.classList.toggle('ready', isMyTurn() && ps.playable && !ps.used);
+  hp.querySelector('.hp-cost').textContent = ps.cost ?? 2;
+  hp.title = ps.name ? `${ps.name} (${ps.cost} маны)\n${ps.desc}` : 'Способность героя';
+  // иконка меняется по id
+  const iconEl = hp.querySelector('.hp-icon');
+  if (ps.id === 'spark') iconEl.textContent = '✦';
+  else if (ps.id === 'ice_lance') iconEl.textContent = '❄';
+  else iconEl.textContent = '✦';
 }
 
 // ═══════════════════════ ВЫБОР И ЦЕЛИ ═══════════════════════

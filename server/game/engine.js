@@ -14,11 +14,11 @@ import { CARD_DB, getCard, DECK_LIST } from './cards.js';
 export const HEROES = [
   {
     name: 'Кайл', title: 'Рыцарь Искры',
-    power: { id: 'spark_totem', name: 'Благословение искры', desc: 'Дает случайному вашему существу +1/+1.', cost: 2 },
+    power: { id: 'spark_bless', name: 'Искра', desc: 'Даёт случайному вашему существу +1/+1 (2 маны).', cost: 2 },
   },
   {
     name: 'Мариса', title: 'Ведьма Инея',
-    power: { id: 'frost_nova', name: 'Ледяная стрела', desc: 'Наносит 1 урона выбранному противнику и оглушает его.', cost: 2 },
+    power: { id: 'frost_dart', name: 'Ледяная игла', desc: 'Наносит 1 урон случайному вражескому существу и замораживает его (2 маны).', cost: 2 },
   },
 ];
 
@@ -243,60 +243,60 @@ export function command(state, seat, cmd) {
 }
 
 // ═══════════════════════ ГЕРОЙСКАЯ СПОСОБНОСТЬ (Этап 8) ═══════════════════════
-//  • Кайл (Рыцарь Искры)  — «Благословение искры»: +1/+1 случайному своему существу (2 маны)
-//  • Мариса (Ведьма Инея) — «Ледяная стрела»: 1 урон врагу + оглушение (нужна цель, 2 маны)
+//  • Кайл: +1/+1 случайному своему существу (2 маны)
+//  • Мариса: 1 урон + заморозка случайному вражескому существу (2 маны)
+// Использование раз в ход; если целей нет — сервер вернёт ошибку.
 
-function applyHeroPower(state, seat, target) {
+function applyHeroPower(state, seat, _target) {
   const p = state.players[seat];
   const opp = 1 - seat;
   const hdef = HEROES[seat];
   const cost = hdef.power.cost;
   if (p.hero.powerUsed) return fail(ERR.power_used);
   if (p.mana < cost) return fail(ERR.not_enough_mana);
+  pushEvent(state, { k: 'hero_power', seat, power: hdef.power.id });
 
   if (seat === 0) {
-    // Кайл: бафф случайного дружественного существа
     const targets = p.board.slice();
-    if (!targets.length) return fail({ code: 'bad_payload', msg: 'Нет своих существ — благословение не на кого наложить' });
+    if (!targets.length) return fail({ code: 'no_targets', msg: 'На вашей стороне нет существ' });
     const m = state.rng.pick(targets);
     p.mana -= cost;
     p.hero.powerUsed = true;
     m.atk += 1; m.health += 1; m.maxHealth += 1;
-    // подхватываем ауру через recomputeBoard
-    pushEvent(state, { k: 'hero_power', seat, power: hdef.power.id });
     pushEvent(state, { k: 'buff', target: { kind:'minion', uid:m.uid, seat }, atk:1, health:1 });
-    recomputeBoard(state);
-    checkWin(state);
-    return ok();
   } else {
-    // Мариса: заморозка врага (существо или герой), нужна цель
-    if (!target) return fail({ code: 'target_required', msg: 'Выберите врага для ледяной стрелы' });
-    const valid = [
-      ...state.players[opp].board.map((m) => ({ kind:'minion', uid:m.uid, seat:opp })),
-      { kind:'hero', seat:opp },
-    ];
-    if (!valid.some((t) => sameUnit(t, target))) return fail({ code: 'invalid_target', msg: 'Цель должна быть врагом' });
+    const targets = state.players[opp].board.slice();
+    if (!targets.length) return fail({ code: 'no_targets', msg: 'На стороне противника нет существ' });
+    const m = state.rng.pick(targets);
     p.mana -= cost;
     p.hero.powerUsed = true;
-    pushEvent(state, { k: 'hero_power', seat, power: hdef.power.id });
-    if (target.kind === 'minion') {
-      const m = findMinion(state, target);
-      if (m) {
-        damageUnit(state, target, 1, 'hero_power');
-        m.frozen = true;
-        pushEvent(state, { k: 'freeze', target });
-      }
-    } else {
-      damageUnit(state, target, 1, 'hero_power');
-      // Заморозить героя не можем, только его атаку оружием — выставим флаг на hero
-      state.players[opp].hero._frozenByPower = true;
-      pushEvent(state, { k: 'freeze', target });
-    }
-    processDeaths(state);
-    recomputeBoard(state);
-    checkWin(state);
-    return ok();
+    damageUnit(state, { kind:'minion', uid:m.uid, seat:opp }, 1, 'hero_power');
+    m.frozen = true;
+    pushEvent(state, { k: 'freeze', target: { kind:'minion', uid:m.uid, seat:opp } });
   }
+  processDeaths(state);
+  recomputeBoard(state);
+  checkWin(state);
+  return ok();
+}
+
+/** Клиент хочет знать, можно ли использовать способность сейчас — и сколько это стоит. */
+export function getHeroPowerState(state, seat) {
+  const p = state.players[seat];
+  const def = HEROES[seat].power;
+  const hasTargets = seat === 0 ? p.board.length > 0 : state.players[1-seat].board.length > 0;
+  return {
+    id: def.id,
+    name: def.name,
+    desc: def.desc,
+    cost: def.cost,
+    used: !!p.hero.powerUsed,
+    playable: state.status === 'running'
+      && state.turn === seat
+      && !p.hero.powerUsed
+      && p.mana >= def.cost
+      && hasTargets,
+  };
 }
 
 // ═══════════════════════ АТАКИ (Этап 3) ═══════════════════════

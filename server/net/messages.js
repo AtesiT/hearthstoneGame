@@ -64,6 +64,10 @@ export function handleMessage(ns, ctx, msg) {
           toSeat: d.toSeat ?? null,
         });
         break;
+      case 'hero_power':
+        ns.updateAck(ctx, d.ack);
+        res = ns.gameCommand(ctx, { type: 'hero_power' });
+        break;
       case 'request_state':
         ns.sendState(ctx);
         return;

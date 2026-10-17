@@ -12,7 +12,7 @@
 // Бот вызывается прямо из NetServer по таймеру (нет сетевого соединения).
 // Все команды прогоняются через engineCommand как обычный игрок — античит работает.
 //
-import { command as engineCommand, computePlayOptions, computeAttackOptions } from './engine.js';
+import { command as engineCommand, computePlayOptions, computeAttackOptions, getHeroPowerState } from './engine.js';
 import { getCard } from './cards.js';
 
 const AI_NICK = '🤖 Ярополк';
@@ -76,7 +76,23 @@ function aiTick(ns, room) {
     return;
   }
 
-  // 2. лучшая карта к розыгрышу
+  // 2. геройская способность: используем, когда сервер разрешает (playable)
+  //    и когда больше нечего разыграть за ≤2 маны (иначе карты дают больше темпа).
+  const powerState = getHeroPowerState(room.game, AI_SEAT);
+  if (powerState.playable) {
+    const cheap = computePlayOptions(room.game, AI_SEAT)
+      .filter((o) => o.playable)
+      .find((o) => {
+        const d = cardDefs(room.game).get(o.cardId);
+        return d && d.cost <= room.game.players[AI_SEAT].mana - powerState.cost;
+      });
+    if (!cheap) {
+      runCmd(ns, room, { type: 'hero_power' });
+      return;
+    }
+  }
+
+  // 3. лучшая карта к розыгрышу
   const play = choosePlayCard(room.game);
   if (play) {
     runCmd(ns, room, play);
@@ -348,10 +364,8 @@ function cardDefs(state) {
     };
     for (const p of state.players) {
       [...p.hand, ...p.board, ...p.deck].forEach(visit);
-      // геройское оружие
       if (p.hero.weapon) visit({ cardId: p.hero.weapon.cardId });
     }
-    // dawn_coin
     visit({ cardId: 'dawn_coin' });
     state._cardDefs = map;
   }
